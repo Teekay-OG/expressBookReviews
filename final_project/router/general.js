@@ -39,7 +39,6 @@ public_users.get('/isbn/:isbn', async (req, res) => {
     }
 });
 
-// ---------------- Get book details based on author ----------------
 // ---------------- Task 3: Get book details based on author (async) ----------------
 public_users.get('/author/:author', async (req, res) => {
     const author = req.params.author.toLowerCase();
@@ -62,16 +61,24 @@ public_users.get('/author/:author', async (req, res) => {
     }
 });
 
-
-// ---------------- Get all books based on title ----------------
-public_users.get('/title/:title', (req, res) => {
+// ---------------- Task 13: Get all books based on title (async/await) ----------------
+public_users.get('/title/:title', async (req, res) => {
     const title = req.params.title.toLowerCase();
-    const results = Object.values(books).filter(book => book.title.toLowerCase() === title);
 
-    if (results.length > 0) {
+    try {
+        const results = await new Promise((resolve, reject) => {
+            setTimeout(() => {
+                const matchingBooks = Object.values(books).filter(
+                    book => book.title.toLowerCase() === title
+                );
+                if (matchingBooks.length > 0) resolve(matchingBooks);
+                else reject(new Error("No books found with this title"));
+            }, 0);
+        });
+
         return res.status(200).json(results);
-    } else {
-        return res.status(404).json({ message: "No books found with this title" });
+    } catch (err) {
+        return res.status(404).json({ message: err.message });
     }
 });
 
