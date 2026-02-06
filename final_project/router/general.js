@@ -40,16 +40,28 @@ public_users.get('/isbn/:isbn', async (req, res) => {
 });
 
 // ---------------- Get book details based on author ----------------
-public_users.get('/author/:author', (req, res) => {
+// ---------------- Task 3: Get book details based on author (async) ----------------
+public_users.get('/author/:author', async (req, res) => {
     const author = req.params.author.toLowerCase();
-    const results = Object.values(books).filter(book => book.author.toLowerCase() === author);
 
-    if (results.length > 0) {
+    try {
+        // Simulate async fetch with a Promise
+        const results = await new Promise((resolve, reject) => {
+            setTimeout(() => {
+                const booksByAuthor = Object.values(books).filter(
+                    book => book.author.toLowerCase() === author
+                );
+                if (booksByAuthor.length > 0) resolve(booksByAuthor);
+                else reject(new Error("No books found by this author"));
+            }, 0);
+        });
+
         return res.status(200).json(results);
-    } else {
-        return res.status(404).json({ message: "No books found by this author" });
+    } catch (err) {
+        return res.status(404).json({ message: err.message });
     }
 });
+
 
 // ---------------- Get all books based on title ----------------
 public_users.get('/title/:title', (req, res) => {
