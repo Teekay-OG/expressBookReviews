@@ -1,10 +1,8 @@
 const express = require('express');
-const axios = require('axios'); // Added for async HTTP requests
+const public_users = express.Router();
 let books = require("./booksdb.js");
 let isValid = require("./auth_users.js").isValid;
 let users = require("./auth_users.js").users;
-
-const public_users = express.Router();
 
 // ---------------- User Registration (kept for reference) ----------------
 public_users.post("/register", (req, res) => {
@@ -12,24 +10,32 @@ public_users.post("/register", (req, res) => {
 });
 
 // ---------------- Task 10: Get the book list asynchronously ----------------
-// ---------------- Task 10: Get the book list asynchronously (without Axios) ----------------
 public_users.get('/books', async (req, res) => {
     try {
-        // Simply return the local books object
+        // Simulate async operation
+        await new Promise(resolve => setTimeout(resolve, 0));
         return res.status(200).json(books);
     } catch (err) {
         return res.status(500).json({ message: "Error fetching books", error: err.message });
     }
 });
 
-
-// ---------------- Get book details based on ISBN ----------------
-public_users.get('/isbn/:isbn', (req, res) => {
+// ---------------- Task 2: Get book details based on ISBN (async) ----------------
+public_users.get('/isbn/:isbn', async (req, res) => {
     const isbn = req.params.isbn;
-    if (books[isbn]) {
-        return res.status(200).json(books[isbn]);
-    } else {
-        return res.status(404).json({ message: "Book not found" });
+
+    try {
+        // Simulate async operation with a Promise
+        const book = await new Promise((resolve, reject) => {
+            setTimeout(() => {
+                if (books[isbn]) resolve(books[isbn]);
+                else reject(new Error("Book not found"));
+            }, 0);
+        });
+
+        return res.status(200).json(book);
+    } catch (err) {
+        return res.status(404).json({ message: err.message });
     }
 });
 
@@ -45,7 +51,7 @@ public_users.get('/author/:author', (req, res) => {
     }
 });
 
-// ---------------- Get book details based on title ----------------
+// ---------------- Get all books based on title ----------------
 public_users.get('/title/:title', (req, res) => {
     const title = req.params.title.toLowerCase();
     const results = Object.values(books).filter(book => book.title.toLowerCase() === title);
